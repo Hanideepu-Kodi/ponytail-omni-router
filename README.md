@@ -10,3 +10,10 @@ billing setup.
 
 Copy `.env.example` to an ignored local environment file and add the project key
 from OmniRoute's API Keys dashboard. Never commit that key.
+
+## Character sprite
+
+The approved character source, expression references, and consistency contract
+live in [`assets/character`](assets/character/SPRITE.md). Runtime animation must
+reuse the locked canonical body rather than generating or swapping independent
+full-character images for each state.

@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "identity": "approved-office-agent-v1",
+  "canonical": {
+    "file": "canonical-master.png",
+    "sha256": "19e7436803bbde4ce71e12efc883e312e8a9c17df02fd80b0ea9ef83a9072802",
+    "width": 1024,
+    "height": 1536,
+    "format": "png",
+    "colorMode": "rgba",
+    "pivot": {
+      "x": 0.5,
+      "y": 1.0
+    }
+  },
+  "references": [
+    {
+      "file": "turnaround.png",
+      "role": "multi-angle-reference"
+    },
+    {
+      "file": "expressions.png",
+      "role": "expression-reference"
+    },
+    {
+      "file": "facial-states-reference.png",
+      "role": "state-acting-reference",
+      "runtimeReady": false
+    },
+    {
+      "file": "mouth-atlas-reference.png",
+      "role": "viseme-reference",
+      "runtimeReady": false
+    },
+    {
+      "file": "eye-atlas-reference.png",
+      "role": "blink-gaze-reference",
+      "runtimeReady": false
+    }
+  ],
+  "states": [
+    "idle",
+    "listening",
+    "transcribing",
+    "thinking",
+    "speaking",
+    "error",
+    "offline"
+  ],
+  "rules": {
+    "singleCanonicalBody": true,
+    "fixedStageBounds": true,
+    "fixedFaceAnchors": true,
+    "allowWholeCharacterStateSwaps": false,
+    "allowPerStateScale": false
+  }
+}
