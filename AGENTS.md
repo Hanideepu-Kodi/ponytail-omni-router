@@ -4,6 +4,7 @@
 
 - Whatever action you can do yourself, please do yourself. This includes starting apps and verification.
 - Complete relevant implementation, setup, and validation work directly instead of asking the user to perform steps that the agent can perform.
+- If a user request is too vague to complete without assumptions, question the user immediately until every material ambiguity is resolved and no assumptions remain.
 - When the project has runnable checks, run the relevant checks after making changes and report anything that could not be verified.
 
 ## UI icons
