@@ -1,0 +1,36 @@
+{
+  "name": "ponytail-omni-router",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Voice-first desktop AI test agent powered by OmniRoute.",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
+    "dev:web": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "@phosphor-icons/react": "2.1.10",
+    "dotenv": "18.0.9",
+    "kokoro-js": "1.2.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "6.2.1",
+    "concurrently": "10.0.6",
+    "electron": "45.2.3",
+    "typescript": "^5.9.0",
+    "vite": "8.3.6",
+    "wait-on": "9.0.5"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
+  }
+}
