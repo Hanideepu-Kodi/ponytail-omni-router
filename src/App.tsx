@@ -2,7 +2,6 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   DownloadSimple,
-  GearSix,
   PlugsConnected,
   SpeakerHigh,
   WarningCircle,
@@ -168,9 +167,6 @@ export default function App() {
             {connected ? <PlugsConnected size={18} /> : <WarningCircle size={18} />}
             <span>{connected ? config?.model : "API key required"}</span>
           </div>
-          <button className="icon-button" type="button" aria-label="Settings" title="Settings">
-            <GearSix size={20} />
-          </button>
         </div>
       </header>
 
