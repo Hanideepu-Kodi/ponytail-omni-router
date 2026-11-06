@@ -1,14 +1,27 @@
-const { app, BrowserWindow, ipcMain, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, session } = require("electron");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 const dotenv = require("dotenv");
+const { getEndpointPolicy, isAllowedRendererUrl, parseEndpoint } = require("./security.cjs");
 
 dotenv.config({ path: path.join(process.cwd(), ".env.local"), quiet: true });
 dotenv.config({ path: path.join(process.cwd(), ".env"), quiet: true });
 
-const baseUrl = (process.env.OMNIROUTE_BASE_URL || "http://127.0.0.1:20128/v1").replace(/\/$/, "");
+const endpoint = parseEndpoint(process.env.OMNIROUTE_BASE_URL || "http://127.0.0.1:20128/v1");
+const baseUrl = endpoint.href;
 const model = process.env.OMNIROUTE_MODEL || "ddgw/gpt-5.4-mini";
 const apiKey = process.env.OMNIROUTE_API_KEY || "";
-const isLoopback = /^https?:\/\/(?:127\.0\.0\.1|localhost|\[::1\])(?::|\/|$)/.test(baseUrl);
+const endpointPolicy = getEndpointPolicy(endpoint, apiKey);
+const rendererEntryUrl = app.isPackaged
+  ? pathToFileURL(path.join(__dirname, "..", "dist", "index.html")).href
+  : "http://127.0.0.1:5173/";
+const maxPromptCharacters = 20_000;
+
+function assertTrustedSender(event) {
+  if (!event.senderFrame || !isAllowedRendererUrl(event.senderFrame.url, rendererEntryUrl)) {
+    throw new Error("Blocked IPC request from an untrusted page.");
+  }
+}
 
 function createWindow() {
   const window = new BrowserWindow({
@@ -27,9 +40,9 @@ function createWindow() {
   });
 
   window.once("ready-to-show", () => window.show());
-  window.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("https://")) shell.openExternal(url);
-    return { action: "deny" };
+  window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  window.webContents.on("will-navigate", (event, url) => {
+    if (!isAllowedRendererUrl(url, rendererEntryUrl)) event.preventDefault();
   });
 
   if (app.isPackaged) {
@@ -39,19 +52,18 @@ function createWindow() {
   }
 }
 
-ipcMain.handle("app:config", () => ({
-  baseUrl,
-  model,
-  configured: Boolean(apiKey) || isLoopback,
-}));
+ipcMain.handle("app:config", (event) => {
+  assertTrustedSender(event);
+  return { baseUrl, model, configured: endpointPolicy.configured };
+});
 
-ipcMain.handle("omniroute:chat", async (_event, prompt) => {
+ipcMain.handle("omniroute:chat", async (event, prompt) => {
+  assertTrustedSender(event);
   if (typeof prompt !== "string" || !prompt.trim()) {
     throw new Error("Enter a message before asking the agent.");
   }
-  if (!apiKey && !isLoopback) {
-    throw new Error("Add OMNIROUTE_API_KEY to .env.local, then restart the app.");
-  }
+  if (prompt.length > maxPromptCharacters) throw new Error("Message is too long.");
+  if (!endpointPolicy.configured) throw new Error(endpointPolicy.error);
 
   const headers = { "Content-Type": "application/json" };
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
@@ -81,6 +93,10 @@ ipcMain.handle("omniroute:chat", async (_event, prompt) => {
 });
 
 app.whenReady().then(() => {
+  session.defaultSession.setPermissionCheckHandler(() => false);
+  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
+  });
   createWindow();
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

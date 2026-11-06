@@ -9,7 +9,7 @@
     "dev": "concurrently --kill-others-on-fail \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
     "dev:web": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit && node --test electron/security.test.cjs"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
